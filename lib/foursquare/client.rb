@@ -23,20 +23,23 @@ module Foursquare
     end
     
     def request(url, opts)
-       http = http_request(url, opts)
-       http.errback { fail }
-       http.callback do
-         parsed = Yajl::Parser.parse(http.response)
-         venues = parsed['response']['venues']
-         venues = venues.map{|data| Foursquare::Venue.new(data)}
-         succeed venues
-       end
-       http
-     end
+      http = http_request(url, opts)
+      http.errback { fail(Exception.new("An error occured in the HTTP request: #{http.errors}")) }
+      http.callback do
+        begin
+          parsed = Yajl::Parser.parse(http.response)
+          venues = parsed['response']['venues']
+          venues = venues.map{|data| Foursquare::Venue.new(data)}
+          succeed venues
+        rescue Exception => e
+          fail(e)
+        end
+      end
+      http
+    end
 
-     def http_request(url, opts)
-       EventMachine::HttpRequest.new(@base_uri + url).aget(opts)
-     end
-    
+    def http_request(url, opts)
+      EventMachine::HttpRequest.new(@base_uri + url).aget(opts)
+    end
   end
 end
