@@ -10,7 +10,7 @@ module Foursquare
     # @option options [String] :key Your BingMaps API key
     def initialize(client_id, client_secret, options={})
       @base_uri = 'https://api.foursquare.com'
-      @defaults = {:client_id => client_id, :client_secret => client_secret, :v => '20110727'}
+      @defaults = {:client_id => client_id, :client_secret => client_secret, :v => '20110727'}.merge(options)
       self
     end
     
@@ -19,7 +19,7 @@ module Foursquare
     # @param [Hash] options Options
     # @option options [String] :query The query to use for the request
     def search(ll, options={})
-      request("/v2/venues/search", :query => @defaults.merge(:ll => ll))
+      request("/v2/venues/search", :query => @defaults.merge(:ll => ll).merge(options))
     end
     
     def request(url, opts)
