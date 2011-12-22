@@ -1,7 +1,7 @@
 module Foursquare
   class Client
     include EventMachine::Deferrable
-    
+
     # Create a new Foursquare client
     #
     # @param [String] client_id Your Application ID
@@ -13,7 +13,7 @@ module Foursquare
       @defaults = {:client_id => client_id, :client_secret => client_secret, :v => '20110727'}.merge(options)
       self
     end
-    
+
     # Get an address for a specified point (latitude and longitude)
     # @param [String] ll Latitude and longitude
     # @param [Hash] options Options
@@ -21,14 +21,14 @@ module Foursquare
     def search(ll, options={})
       request("/v2/venues/search", :query => @defaults.merge(:ll => ll).merge(options))
     end
-    
+
     def request(url, opts)
       http = http_request(url, opts)
       http.errback { fail(Exception.new("An error occured in the HTTP request: #{http.errors}")) }
       http.callback do
         begin
           parsed = Yajl::Parser.parse(http.response)
-          venues = parsed['response']['venues']
+          venues = parsed['response']['venues'] || []
           venues = venues.map{|data| Foursquare::Venue.new(data)}
           succeed venues
         rescue Exception => e
